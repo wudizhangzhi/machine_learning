@@ -4,7 +4,7 @@ from PIL import Image
 from PIL.ImageDraw import Draw
 from PIL.ImageFont import truetype
 
-from model.utils import CaptchaUtils
+from captcha_utils.utils import CaptchaUtils
 
 
 class Char(object):

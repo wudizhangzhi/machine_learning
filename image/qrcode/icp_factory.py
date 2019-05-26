@@ -5,7 +5,7 @@ target captcha url: http://www.miitbeian.gov.cn/getVerifyCode?4
 """
 import json
 
-from model.capthafactory import CaptchaFactory
+from captcha_utils.capthafactory import CaptchaFactory
 import numpy as np
 
 

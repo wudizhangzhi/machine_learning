@@ -5,8 +5,8 @@ import random
 import re
 from PIL import Image
 from PIL.ImageDraw import Draw
-from model.utils import CaptchaUtils
-from model.char import Char
+from captcha_utils.utils import CaptchaUtils
+from captcha_utils.char import Char
 
 
 class Captcha(object):

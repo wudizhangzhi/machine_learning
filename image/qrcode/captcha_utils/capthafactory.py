@@ -1,9 +1,9 @@
 # coding: utf-8
 import os
 
-from model.utils import CaptchaUtils
+from captcha_utils.utils import CaptchaUtils
 
-from model.captcha import Captcha
+from captcha_utils.captcha import Captcha
 
 
 class CaptchaFactory(object):
