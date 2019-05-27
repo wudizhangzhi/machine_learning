@@ -15,10 +15,10 @@ def junka_predict_one(captcha, test_func):
     ret = cnn_ctc.decode_batch(test_func, TextImageGenerator.labels_to_text, x)
     return ret
 
-# if __name__ == '__main__':
-#     import cv2
-#
-#     weight_path = 'E:\\Workplace\\bdzh\\MachineLearning\\SmallCaptcha\\image_ocr\\2019_05_24_21_49_38\\weights70_acc_87.00000.h5'
-#     test_path = 'E:\\test.png'
-#     captcha = cv2.imread(test_path)
-#     print(junka_predict_one(captcha, weight_path)[0])
+if __name__ == '__main__':
+    import cv2
+
+    weight_path = 'E:\\Workplace\\bdzh\\MachineLearning\\SmallCaptcha\\image_ocr\\2019_05_24_21_49_38\\weights70_acc_87.00000.h5'
+    test_path = 'E:\\test.png'
+    captcha = cv2.imread(test_path)
+    print(junka_predict_one(captcha, weight_path)[0])

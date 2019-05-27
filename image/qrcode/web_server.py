@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 from flask import Flask
 from flask import request
 import numpy as np
@@ -39,4 +40,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=2000)
+    app.run(debug=False, port=2000, host="0.0.0.0")
