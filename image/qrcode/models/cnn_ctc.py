@@ -132,11 +132,13 @@ def icp_model():
 def train(model, train_gen, validate_gen,
           steps_per_epoch=100, epochs=40, validation_steps=5,
           optimizer=None,
-          callbacks=None):
+          callbacks=None, weight=None):
     # clipnorm seems to speeds up convergence
     if not optimizer:
         optimizer = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
     model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
+    if weight:
+        model.load_weights(weight)
     model.fit_generator(generator=train_gen,
                         steps_per_epoch=steps_per_epoch,
                         epochs=epochs,

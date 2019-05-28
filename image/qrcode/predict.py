@@ -15,6 +15,7 @@ def junka_predict_one(captcha, test_func):
     ret = cnn_ctc.decode_batch(test_func, TextImageGenerator.labels_to_text, x)
     return ret
 
+
 if __name__ == '__main__':
     import cv2
 
