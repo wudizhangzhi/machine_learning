@@ -4,6 +4,7 @@ import keras.callbacks
 import cv2
 from captcha_utils.icp_factory import GenCaptcha
 from scipy import ndimage
+import keras.preprocessing.image
 
 
 def image_blur(image):
@@ -90,6 +91,9 @@ class TextImageGenerator(keras.callbacks.Callback):
         img = img / 255.
         #         img_transpose = np.einsum('hw->wh', img)
         img = np.expand_dims(img, axis=-1)
+        # rotation
+        img = keras.preprocessing.image.random_rotation(img, np.random.randint(0, 8))
+        # noise
         img = image_blur(img)
         return img
 
@@ -99,6 +103,7 @@ class TextImageGenerator(keras.callbacks.Callback):
             获取验证码对应的字符串
             """
             return os.path.basename(img_path).split('_')[-1].split('.')[0].lower()
+
         i = 0
         X_data = np.zeros((batch_size, self.img_h, self.img_w, self.channel))
         labels = np.zeros((batch_size, self.absolute_max_string_len))
@@ -167,7 +172,7 @@ class RandomTextImageGenerator(TextImageGenerator):
                 # 归零，洗牌
                 self.cur_train_idx = 0
                 np.random.shuffle(paths)
-            is_use_diy = np.random.random() > 0.5
+            is_use_diy = np.random.random() > 0.2
             if is_random and is_use_diy:
                 captcha, label_text = self.diy_gen.gen_one()
                 captcha = self.formatCaptcha(captcha)
@@ -213,14 +218,14 @@ class RandomTextImageGenerator(TextImageGenerator):
                 # 归零，洗牌
                 self.cur_vald_idx = 0
                 np.random.shuffle(paths)
-            is_use_diy = np.random.random() > 0.5
-            if is_random and is_use_diy:
-                captcha, label_text = self.diy_gen.gen_one()
-                captcha = self.formatCaptcha(captcha)
-            else:
-                img_path = paths[self.cur_vald_idx]
-                label_text = get_label(img_path)
-                captcha = self.path2matrix(img_path)
+            # is_use_diy = np.random.random() > 0.5
+            # if is_random and is_use_diy:
+            #     captcha, label_text = self.diy_gen.gen_one()
+            #     captcha = self.formatCaptcha(captcha)
+            # else:
+            img_path = paths[self.cur_vald_idx]
+            label_text = get_label(img_path)
+            captcha = self.path2matrix(img_path)
 
             X_data[i, :, :captcha.shape[1], :] = captcha
             input_length[i] = self.img_w // self.downsample_factor - 2
