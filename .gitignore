@@ -110,3 +110,4 @@ logs/
 catboost_info/
 dataset/
 *.csv
+*.hdf5
