@@ -111,3 +111,4 @@ catboost_info/
 dataset/
 *.csv
 *.hdf5
+.DS_Store
