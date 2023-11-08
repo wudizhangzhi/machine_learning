@@ -1,6 +1,7 @@
+import typing as T
+
 import torch
 import torch.nn as nn
-import typing as T
 
 """
 https://zhuanlan.zhihu.com/p/82312421
