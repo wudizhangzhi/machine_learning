@@ -1,81 +1,102 @@
-import json
+import os
+import platform
+import subprocess
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
-import streamlit as st
 import torch
+from colorama import Fore, Style
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation.utils import GenerationConfig
 
-st.set_page_config(page_title="Baichuan 2")
-st.title("Baichuan 2")
+MODEL = Path("D:\github\ml\Model\Baichuan2-7B-Chat-4bits")
 
-MODEL = Path("/Users/zhangzhichao/ML/models/Baichuan2-7B-Chat-4bits")
+print("cuda:", torch.cuda.is_available())
 
 
-@st.cache_resource
 def init_model():
+    print("init model ...")
     model = AutoModelForCausalLM.from_pretrained(
         MODEL,
         local_files_only=True,
         # torch_dtype=torch.float16,
         device_map="auto",
         trust_remote_code=True,
-        offload_folder="offload",
-        # load_in_8bit=True,
     )
     model.generation_config = GenerationConfig.from_pretrained(
         MODEL,
         local_files_only=True,
-        # load_in_8bit=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL,
-        local_files_only=True,
         use_fast=False,
         trust_remote_code=True,
-        # load_in_8bit=True,
+        local_files_only=True,
     )
     return model, tokenizer
 
 
-def clear_chat_history():
-    del st.session_state.messages
-
-
-def init_chat_history():
-    with st.chat_message("assistant", avatar="🤖"):
-        st.markdown("您好，我是百川大模型，很高兴为您服务🥰")
-
-    if "messages" in st.session_state:
-        for message in st.session_state.messages:
-            avatar = "🧑‍💻" if message["role"] == "user" else "🤖"
-            with st.chat_message(message["role"], avatar=avatar):
-                st.markdown(message["content"])
+def clear_screen():
+    if platform.system() == "Windows":
+        os.system("cls")
     else:
-        st.session_state.messages = []
+        os.system("clear")
+    print(
+        Fore.YELLOW
+        + Style.BRIGHT
+        + "欢迎使用百川大模型，输入进行对话，vim 多行输入，clear 清空历史，CTRL+C 中断生成，stream 开关流式生成，exit 结束。"
+    )
+    return []
 
-    return st.session_state.messages
+
+def vim_input():
+    with NamedTemporaryFile() as tempfile:
+        tempfile.close()
+        subprocess.call(["vim", "+star", tempfile.name])
+        text = open(tempfile.name).read()
+    return text
 
 
-def main():
+def main(stream=True):
     model, tokenizer = init_model()
-    messages = init_chat_history()
-
-    if prompt := st.chat_input("Shift + Enter 换行, Enter 发送"):
-        with st.chat_message("user", avatar="🧑‍💻"):
-            st.markdown(prompt)
+    messages = clear_screen()
+    while True:
+        prompt = input(Fore.GREEN + Style.BRIGHT + "\n用户：" + Style.NORMAL)
+        if prompt.strip() == "exit":
+            break
+        if prompt.strip() == "clear":
+            messages = clear_screen()
+            continue
+        if prompt.strip() == "vim":
+            prompt = vim_input()
+            print(prompt)
+        print(Fore.CYAN + Style.BRIGHT + "\nBaichuan 2：" + Style.NORMAL, end="")
+        if prompt.strip() == "stream":
+            stream = not stream
+            print(
+                Fore.YELLOW + "({}流式生成)\n".format("开启" if stream else "关闭"),
+                end="",
+            )
+            continue
         messages.append({"role": "user", "content": prompt})
-        print(f"[user] {prompt}", flush=True)
-        with st.chat_message("assistant", avatar="🤖"):
-            placeholder = st.empty()
-            for response in model.chat(tokenizer, messages, stream=True):
-                placeholder.markdown(response)
-                if torch.backends.mps.is_available():
-                    torch.mps.empty_cache()
+        if stream:
+            position = 0
+            try:
+                for response in model.chat(tokenizer, messages, stream=True):
+                    print(response[position:], end="", flush=True)
+                    position = len(response)
+                    if torch.backends.mps.is_available():
+                        torch.mps.empty_cache()
+            except KeyboardInterrupt:
+                pass
+            print()
+        else:
+            response = model.chat(tokenizer, messages)
+            print(response)
+            if torch.backends.mps.is_available():
+                torch.mps.empty_cache()
         messages.append({"role": "assistant", "content": response})
-        print(json.dumps(messages, ensure_ascii=False), flush=True)
-
-        st.button("清空对话", on_click=clear_chat_history)
+    print(Style.RESET_ALL)
 
 
 if __name__ == "__main__":
