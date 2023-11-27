@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation.utils import GenerationConfig
 
 MODEL = Path("D:\github\ml\Model\Baichuan2-7B-Chat-4bits")
-
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("cuda:", torch.cuda.is_available())
 
 
